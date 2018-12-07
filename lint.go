@@ -10,6 +10,8 @@ import (
 )
 
 func main() {
+	fail := false
+
 	for i, arg := range os.Args {
 		if i == 0 {
 			continue
@@ -22,22 +24,28 @@ func main() {
 
 		files, err := filepath.Glob(search)
 		if err != nil {
-			fmt.Printf("error finding files: %s", err)
+			fmt.Println("error finding files:", err)
 		}
 
 		for _, filename := range files {
-			fmt.Printf("Checking %s ... ", filename)
+			fmt.Println("Checking \"" + filename + "\"")
 			file, err := ioutil.ReadFile(filename)
 			if err != nil {
-				fmt.Printf("error reading file: %s\n", err)
-				break
+				fmt.Println("error reading file:", err)
+				fail = true
+				continue
 			}
 
 			_, err = hcl.Parse(string(file))
 			if err != nil {
-				fmt.Printf("error parsing file: %s\n", err)
-				break
+				fmt.Println("error parsing file: ", err)
+				fail = true
+				continue
 			}
 		}
+	}
+
+	if fail {
+		os.Exit(-1)
 	}
 }
